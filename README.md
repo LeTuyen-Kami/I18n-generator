@@ -35,7 +35,7 @@ npm install
 3. Click "Extract Texts" to analyze your code and extract translatable strings
 4. A text file will be generated with all extracted strings
 
-![Extract Texts](./media/main.png)
+![Extract Texts](./media/extractor.png)
 
 ### 2. Generate Translations
 
@@ -48,7 +48,9 @@ npm install
 4. When complete, you can view the generated i18n.json file
 5. The extension is compatible with app.hyperbolic.xyz, which is currently free to use. If you plan to use a different service, you may need to modify the code accordingly.
 
-![Generate Translations](./media/generate.png)
+![Generate Translations](./media/generator.png)
+![Input](./media/input.png)
+![Output](./media/output.png)
 
 ## Supported File Types
 

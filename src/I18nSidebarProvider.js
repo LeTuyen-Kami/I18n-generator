@@ -53,7 +53,7 @@ class I18nSidebarProvider {
             }
           );
 
-          const jsonResponse = this.extractJsonFromResponse(res.data.response);
+          const jsonResponse = this.extractJsonFromResponse(res.data);
 
           console.log("API response:", jsonResponse);
           webviewView.webview.postMessage({
@@ -183,7 +183,7 @@ class I18nSidebarProvider {
         response = response.choices[0].message.content;
       }
       // Case 2: Qwen (kiểm tra response dạng này)
-      else if (response.response) {
+      else if (response?.response) {
         response = response.response;
       }
       // Case 3: Meta AI, hoặc các model khác trả về dạng "text"
@@ -342,7 +342,7 @@ class I18nSidebarProvider {
                 font-weight: 500;
             }
 
-            input, button {
+            input, button, select {
                 width: 100%;
                 padding: 8px;
                 border: 1px solid var(--border-color);
@@ -388,6 +388,18 @@ class I18nSidebarProvider {
                 margin: 10px auto;
             }
 
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(3px);
+                -webkit-backdrop-filter: blur(3px);
+            }
+
             .modal {
                 display: none;
                 position: fixed;
@@ -401,6 +413,7 @@ class I18nSidebarProvider {
                 width: 80%;
                 max-width: 300px;
                 text-align: center;
+                z-index: 1000;
             }
 
             .modal-buttons {
@@ -466,6 +479,24 @@ class I18nSidebarProvider {
                         <label>Languages (comma separated)</label>
                         <input type="text" id="languages" value="en,vi" />
                     </div>
+
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" id="model" value="meta-llama/Llama-3.3-70B-Instruct" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Max Tokens</label>
+                        <input type="number" id="maxTokens" value="58183" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="source">
+                            <option value="hyperbolic">Hyperbolic</option>
+                            <option value="local">Local Ollama</option>
+                        </select>
+                    </div>
                     
                     <div class="form-group">
                         <label>Input File</label>
@@ -478,6 +509,7 @@ class I18nSidebarProvider {
                 </div>
             </div>
 
+            <div id="modalOverlay" class="modal-overlay"></div>
             <div id="successModal" class="modal">
                 <h3>Success!</h3>
                 <p>Translations have been generated successfully.</p>
@@ -504,11 +536,17 @@ class I18nSidebarProvider {
             document.getElementById('apiUrl').value = previousState.apiUrl || 'http://localhost:11434/api/generate';
             document.getElementById('apiKey').value = previousState.apiKey || '';
             document.getElementById('languages').value = previousState.languages || 'en,vi';
+            document.getElementById('model').value = previousState.model || 'meta-llama/Llama-3.3-70B-Instruct';
+            document.getElementById('maxTokens').value = previousState.maxTokens || 58183;
+            document.getElementById('source').value = previousState.source || 'hyperbolic';
 
             // Save state handlers
             document.getElementById('apiUrl').addEventListener('input', saveState);
             document.getElementById('apiKey').addEventListener('input', saveState);
             document.getElementById('languages').addEventListener('input', saveState);
+            document.getElementById('model').addEventListener('input', saveState);
+            document.getElementById('maxTokens').addEventListener('input', saveState);
+            document.getElementById('source').addEventListener('change', saveState);
 
             function setLoading(isLoading) {
                 loader.style.display = isLoading ? 'block' : 'none';
@@ -520,10 +558,12 @@ class I18nSidebarProvider {
             function showModal(filePath) {
                 generatedFilePath = filePath;
                 modal.style.display = 'block';
+                document.getElementById('modalOverlay').style.display = 'block';
             }
 
             function closeModal() {
                 modal.style.display = 'none';
+                document.getElementById('modalOverlay').style.display = 'none';
             }
 
             function openGeneratedFile() {
@@ -535,7 +575,10 @@ class I18nSidebarProvider {
                 const state = {
                     apiUrl: document.getElementById('apiUrl').value,
                     apiKey: document.getElementById('apiKey').value,
-                    languages: document.getElementById('languages').value
+                    languages: document.getElementById('languages').value,
+                    model: document.getElementById('model').value,
+                    maxTokens: document.getElementById('maxTokens').value,
+                    source: document.getElementById('source').value
                 };
                 vscode.setState(state);
             }
@@ -560,6 +603,9 @@ class I18nSidebarProvider {
                     apiUrl: document.getElementById('apiUrl').value, 
                     apiKey: document.getElementById('apiKey').value, 
                     languages: document.getElementById('languages').value, 
+                    model: document.getElementById('model').value,
+                    maxTokens: document.getElementById('maxTokens').value,
+                    source: document.getElementById('source').value,
                     sentences: fileContent,
                     filePath: selectedFilePath
                 });
@@ -659,29 +705,37 @@ async function generateTranslations(data, context) {
   **Output the JSON below:**
 `;
 
-    const res = await axios.post(
-      data.apiUrl,
-      {
-        model: "meta-llama/Llama-3.3-70B-Instruct",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        max_tokens: 58183,
-        temperature: 0.1,
-        top_p: 0.9,
-        stream: false,
-      },
-      {
-        headers: { Authorization: `Bearer ${data.apiKey}` },
-      }
-    );
+    const params =
+      data?.source === "hyperbolic"
+        ? {
+            model: data.model,
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            max_tokens: data.maxTokens,
+            temperature: 0.1,
+            top_p: 0.9,
+            stream: false,
+          }
+        : {
+            model: data.model,
+            prompt: prompt,
+            max_tokens: data.maxTokens,
+            temperature: 0.1,
+            top_p: 0.9,
+            stream: false,
+          };
+
+    const res = await axios.post(data.apiUrl, params, {
+      headers: { Authorization: `Bearer ${data.apiKey}` },
+    });
 
     console.log("API res:", res);
 
-    const jsonResponse = context.extractJsonFromResponse(res);
+    const jsonResponse = context.extractJsonFromResponse(res.data);
     return jsonResponse;
   } catch (error) {
     console.log("API error:", error.message);
