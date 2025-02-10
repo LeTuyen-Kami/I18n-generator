@@ -1,0 +1,26 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm install",
+			"type": "shell",
+			"command": "npm install",
+			"problemMatcher": []
+		},
+		{
+			"label": "npm start",
+			"type": "shell",
+			"command": "npm run start",
+			"problemMatcher": [],
+			"isBackground": true
+		},
+		{
+			"type": "npm",
+			"script": "install",
+			"group": "clean",
+			"problemMatcher": [],
+			"label": "npm: install",
+			"detail": "install dependencies from package"
+		}
+	]
+  }

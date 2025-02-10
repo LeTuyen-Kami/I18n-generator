@@ -1,0 +1,52 @@
+{
+  "name": "vscode-i18n-generator",
+  "displayName": "i18n Generator",
+  "version": "1.0.0",
+  "description": "Generate i18n translations",
+  "main": "./src/extension.js", 
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:i18n-sidebar"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "i18n-explorer",
+          "title": "I18n",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "i18n-explorer": [
+        {
+          "type": "webview",
+          "id": "i18n-sidebar",
+          "name": "I18n Generator"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9"
+  },
+  "devDependencies": {
+    "vscode": "^1.1.37"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LeTuyen-Kami/I18n-generator.git"
+  }
+}

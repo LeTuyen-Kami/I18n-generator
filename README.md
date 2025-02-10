@@ -15,7 +15,7 @@ A Visual Studio Code extension to help generate i18n translation files from your
 1. Clone this repository
 
 ```bash
-git clone https://github.com/yourusername/vscode-i18n-generator.git
+git clone https://github.com/LeTuyen-Kami/I18n-generator.git
 ```
 
 2. Install dependencies
@@ -35,6 +35,8 @@ npm install
 3. Click "Extract Texts" to analyze your code and extract translatable strings
 4. A text file will be generated with all extracted strings
 
+![Extract Texts](./media/main.png)
+
 ### 2. Generate Translations
 
 1. Configure your API settings:
@@ -44,6 +46,9 @@ npm install
 2. Click "Choose File" to select the text file containing strings to translate
 3. Click "Generate Translations" to start the translation process
 4. When complete, you can view the generated i18n.json file
+5. The extension is compatible with app.hyperbolic.xyz, which is currently free to use. If you plan to use a different service, you may need to modify the code accordingly.
+
+![Generate Translations](./media/generate.png)
 
 ## Supported File Types
 
